@@ -5,7 +5,7 @@ from functools import wraps
 from ratelimit import ALL, UNSAFE
 from ratelimit.exceptions import Ratelimited
 from ratelimit.core import is_ratelimited
-
+from django.http import JsonResponse
 
 __all__ = ['ratelimit']
 
@@ -20,7 +20,8 @@ def ratelimit(group=None, key=None, rate=None, method=ALL, block=False):
                                          increment=True)
             request.limited = ratelimited or old_limited
             if ratelimited and block:
-                raise Ratelimited()
+                return JsonResponse({'error': 'Ratelimited'}, status=429)
+                
             return fn(request, *args, **kw)
         return _wrapped
     return decorator
